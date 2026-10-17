@@ -142,6 +142,13 @@ def translate_text(
 
     Does not skip the call for `target_language_code == "en-IN"` itself —
     callers that already have English text should not call this at all.
+
+    # OPEN: chunks are translated independently, so a status update long
+    # enough to need more than one chunk could lose context across the
+    # join. In practice every template in notify/roles.py is one or two
+    # short sentences, well under either cap, so this has not been hit; it
+    # would matter if a future caller (e.g. the conversation-turn
+    # orchestrator) sent a longer passage through this same function.
     """
     model = _model_for(target_language_code)
     limit = _char_limit(model)
