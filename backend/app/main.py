@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from . import audit, store
-from .api import intake, notify
+from .api import clinic, intake, notify, talk
 from .config import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -38,12 +38,16 @@ app = FastAPI(
     title="Family Health Agent — intake and spoken update",
     version="0.1.0",
     description=(
-        "Two slices of README.md: verbatim voice-note intake (Saaras v4) and the "
-        "role-filtered spoken status update (Mayura v1 + Bulbul v4 Flash)."
+        "Two functionalities from README.md. (1) The person talks to the agent: "
+        "Saaras v4 verbatim in, strict-schema assessment, Bulbul v4 Flash back in "
+        "their own language. (2) The agent then calls the clinic, books a slot and "
+        "hands the parent the line."
     ),
     lifespan=lifespan,
 )
 
+app.include_router(talk.router)      # 1. the person talks to the agent
+app.include_router(clinic.router)    # 2. the agent calls the clinic
 app.include_router(intake.router)
 app.include_router(notify.router)
 
