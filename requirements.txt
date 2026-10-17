@@ -1,0 +1,3 @@
+# Vercel installs from the project root. The backend's pins are the single
+# source of truth; this file only points at them.
+-r backend/requirements.txt
