@@ -1,0 +1,102 @@
+{
+  "id": "hh_warangal_01",
+  "city_pair": [
+    "Hyderabad",
+    "Warangal"
+  ],
+  "tts_dict_id": null,
+  "people": [
+    {
+      "id": "p_amma",
+      "name": "Lakshmi",
+      "phone_e164": "+919800000001",
+      "preferred_language": "te-IN",
+      "second_language": "hi-IN",
+      "reads_roman_script": false,
+      "roles": [
+        "affected"
+      ],
+      "consent_given_at": "2026-09-01T10:00:00+00:00"
+    },
+    {
+      "id": "p_son",
+      "name": "Ravi",
+      "phone_e164": "+919800000002",
+      "preferred_language": "en-IN",
+      "second_language": "te-IN",
+      "reads_roman_script": true,
+      "roles": [
+        "responsible",
+        "family_group"
+      ],
+      "consent_given_at": "2026-09-01T10:02:00+00:00"
+    },
+    {
+      "id": "p_sister",
+      "name": "Divya",
+      "phone_e164": "+919800000003",
+      "preferred_language": "hi-IN",
+      "second_language": "en-IN",
+      "reads_roman_script": true,
+      "roles": [
+        "family_group"
+      ],
+      "consent_given_at": "2026-09-01T10:05:00+00:00"
+    }
+  ],
+  "medicines": [
+    {
+      "id": "m_telma",
+      "person_id": "p_amma",
+      "name": "Telmisartan",
+      "strength": "40mg",
+      "dose_per_day": 2
+    },
+    {
+      "id": "m_metf",
+      "person_id": "p_amma",
+      "name": "Metformin",
+      "strength": "500mg",
+      "dose_per_day": 2
+    },
+    {
+      "id": "m_atorva",
+      "person_id": "p_amma",
+      "name": "Atorvastatin",
+      "strength": "10mg",
+      "dose_per_day": 1
+    }
+  ],
+  "red_flags": [
+    "chest pain",
+    "fainting or blackout",
+    "slurred speech",
+    "no urine for a day"
+  ],
+  "condition_labels": [
+    "high blood pressure",
+    "sugar"
+  ],
+  "providers": [
+    {
+      "id": "cl_sunrise",
+      "city": "Warangal",
+      "type": "clinic",
+      "rank": 1,
+      "name": "Sunrise Polyclinic",
+      "phone_e164": "+918700000011",
+      "hours": "Mon-Sat 09:00-14:00, 17:00-20:00",
+      "booking_notes": "Ask for Dr Rao's list. Receptionist takes slots by phone."
+    },
+    {
+      "id": "cl_kakatiya",
+      "city": "Warangal",
+      "type": "clinic",
+      "rank": 2,
+      "name": "Kakatiya Clinic",
+      "phone_e164": "+918700000012",
+      "hours": "Mon-Sat 10:00-13:00, 18:00-21:00",
+      "booking_notes": "Walk-ins only before 11:00. Phone booking after that."
+    }
+  ]
+}

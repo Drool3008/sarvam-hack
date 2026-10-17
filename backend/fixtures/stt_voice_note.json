@@ -1,0 +1,10 @@
+{
+  "_comment": "Recorded Saaras v4 verbatim-mode response shape, used verbatim by app/sarvam/stt.py when client.live() is False. Mirrors sarvamai.types.SpeechToTextResponse (request_id, transcript, language_code, language_probability); diarized_transcript is this build's own addition for the batch/mock route, not a field Saaras guarantees.",
+  "request_id": "mock-req-stt-0001",
+  "transcript": "ఈ రోజు నా పంచదార చాలా ఎక్కువగా ఉంది, కాళ్ళు కూడా వాచాయి, కొంచెం నీరసంగా ఉంది",
+  "language_code": "te-IN",
+  "language_probability": 0.93,
+  "diarized_transcript": [
+    { "speaker_id": "SPEAKER_00", "transcript": "ఈ రోజు నా పంచదార చాలా ఎక్కువగా ఉంది, కాళ్ళు కూడా వాచాయి, కొంచెం నీరసంగా ఉంది" }
+  ]
+}
