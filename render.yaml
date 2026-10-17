@@ -1,0 +1,28 @@
+# Render blueprint. Deploy: New -> Blueprint -> point at this repo.
+# SARVAM_API_KEY is marked sync:false so it is set in the Render dashboard and
+# never committed.
+services:
+  - type: web
+    name: sarvam-family-health-agent
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: SARVAM_MOCK
+        value: "false"
+      - key: CONFIDENCE_THRESHOLD
+        value: "0.85"
+      # Only needed to place a real outbound clinic call.
+      - key: SARVAM_VA_API_KEY
+        sync: false
+      - key: SARVAM_ORG_ID
+        sync: false
+      - key: SARVAM_WORKSPACE_ID
+        sync: false
