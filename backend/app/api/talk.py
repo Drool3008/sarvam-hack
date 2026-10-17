@@ -15,8 +15,11 @@ the spoken reply — is validated before anyone hears it.
 
 from __future__ import annotations
 
+import base64
 import logging
+import os
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
@@ -116,6 +119,22 @@ def _reply(
         return _handoff_text(hh), result.source, True
 
     return result.text, result.source, False
+
+
+def _inline_audio(audio_ref: str | None) -> str | None:
+    """The rendered WAV as a data URI, for hosts with an ephemeral filesystem.
+
+    On a serverless host the file is written to /tmp, and the browser's
+    follow-up request for it may be served by a different instance that has no
+    such file. Returning the bytes with the reply avoids that second request.
+    Off by default, because a data URI is ~33% larger than the file.
+    """
+    if not audio_ref or os.environ.get("AUDIO_INLINE") != "1":
+        return None
+    path = tts.OUT_DIR / Path(audio_ref).name
+    if not path.is_file():
+        return None
+    return "data:audio/wav;base64," + base64.b64encode(path.read_bytes()).decode()
 
 
 @router.post("/talk")
@@ -267,6 +286,7 @@ async def talk(
                 "text_in_their_language": said.text,
                 "fallback_reason": said.fallback_reason,
                 "tts_source": said.source,
+                "audio_data_uri": _inline_audio(said.audio_ref),
             }
             store.add_utterance(
                 Utterance.new(

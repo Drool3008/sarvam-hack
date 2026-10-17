@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Health Agent</title>
+<style>
+  :root {
+    --bg:#f7f7f5; --panel:#ffffff; --ink:#1a1a18; --muted:#6b6b66;
+    --line:#e3e3df; --accent:#1f6f5c; --accent-ink:#ffffff;
+    --warn:#8a5a00; --warn-bg:#fdf5e3; --crit:#8c2f1f; --crit-bg:#fbeeec;
+    --code:#f2f2ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#141413; --panel:#1d1d1b; --ink:#eeeeea; --muted:#9b9b94;
+      --line:#2f2f2c; --accent:#4fa98e; --accent-ink:#0f1a17;
+      --warn:#e0b259; --warn-bg:#2b2416; --crit:#e8897a; --crit-bg:#2e1a17;
+      --code:#232321;
+    }
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+  }
+  .wrap { max-width:1060px; margin:0 auto; padding:28px 20px 72px; }
+  header { border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:26px; }
+  h1 { font-size:1.5rem; margin:0 0 4px; letter-spacing:-0.01em; }
+  .sub { color:var(--muted); font-size:0.94rem; margin:0; }
+  .status { margin-top:12px; font-size:0.84rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--muted); margin-right:6px; vertical-align:1px; }
+  .dot.live { background:var(--accent); }
+  .grid { display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); align-items:start; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; }
+  h2 { font-size:1.02rem; margin:0 0 4px; }
+  h2 .n { color:var(--muted); font-weight:400; margin-right:6px; }
+  .hint { color:var(--muted); font-size:0.86rem; margin:0 0 16px; }
+  label { display:block; font-size:0.8rem; color:var(--muted); margin:14px 0 5px; text-transform:uppercase; letter-spacing:0.04em; }
+  select, textarea, input[type=text] {
+    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:7px;
+    background:var(--bg); color:var(--ink); font:inherit; font-size:0.94rem;
+  }
+  textarea { resize:vertical; min-height:74px; }
+  .row { display:flex; gap:9px; flex-wrap:wrap; margin-top:16px; }
+  button {
+    padding:9px 15px; border-radius:7px; border:1px solid var(--accent);
+    background:var(--accent); color:var(--accent-ink); font:inherit; font-size:0.92rem;
+    font-weight:500; cursor:pointer;
+  }
+  button.ghost { background:transparent; color:var(--ink); border-color:var(--line); }
+  button.rec { background:var(--crit-bg); color:var(--crit); border-color:var(--crit); }
+  button:disabled { opacity:0.45; cursor:default; }
+  .out { margin-top:18px; display:none; }
+  .out.show { display:block; }
+  .field { border-top:1px solid var(--line); padding:11px 0; }
+  .field:last-child { border-bottom:1px solid var(--line); }
+  .k { font-size:0.74rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
+  .v { font-size:0.96rem; overflow-wrap:anywhere; }
+  .v.native { font-size:1.08rem; line-height:1.7; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:0.78rem; font-weight:600; letter-spacing:0.02em; }
+  .pill.routine, .pill.elevated { background:var(--warn-bg); color:var(--warn); }
+  .pill.urgent, .pill.critical { background:var(--crit-bg); color:var(--crit); }
+  .tags { display:flex; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:0.76rem; background:var(--code); border:1px solid var(--line); border-radius:5px; padding:2px 7px; color:var(--muted); }
+  audio { width:100%; margin-top:8px; }
+  .turns { margin-top:16px; border-top:1px solid var(--line); }
+  .turn { display:grid; grid-template-columns:116px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); font-size:0.92rem; }
+  .who { color:var(--muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.04em; padding-top:2px; }
+  .turn.agent .who { color:var(--accent); }
+  .note { margin-top:16px; padding:11px 13px; border-radius:7px; font-size:0.87rem; background:var(--warn-bg); color:var(--warn); }
+  .note.err { background:var(--crit-bg); color:var(--crit); }
+  footer { margin-top:34px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:0.84rem; }
+  footer a { color:var(--accent); }
+  code { background:var(--code); padding:1px 5px; border-radius:4px; font-size:0.86em; }
+  .spin { display:inline-block; width:11px; height:11px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:s 0.7s linear infinite; vertical-align:-1px; margin-right:6px; }
+  @keyframes s { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Family Health Agent</h1>
+  <p class="sub">The household agent that keeps an ageing parent's medicines and appointments running.</p>
+  <p class="status" id="status"><span class="dot"></span>checking backend…</p>
+</header>
+
+<div class="grid">
+
+  <section>
+    <h2><span class="n">1</span>Talk to the agent</h2>
+    <p class="hint">Speak or type the way you would to family. The agent keeps your exact words,
+      works out a tier, and answers out loud in your own language.</p>
+
+    <label for="person">Who is speaking</label>
+    <select id="person"></select>
+
+    <label for="text">What you want to say</label>
+    <textarea id="text" placeholder="Amma says her legs have been swollen for three days."></textarea>
+
+    <div class="row">
+      <button id="send">Send</button>
+      <button id="rec" class="rec">● Record instead</button>
+      <button id="clear" class="ghost">Clear</button>
+    </div>
+
+    <div class="out" id="talkOut"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span>The agent calls the clinic</h2>
+    <p class="hint">The agent speaks to the receptionist, holds the slot, then hands the parent the
+      line so they confirm their own appointment by name.</p>
+
+    <label for="reason">Why it is calling</label>
+    <input type="text" id="reason" value="the family asked for a check-up">
+
+    <label for="window">Window to ask for</label>
+    <input type="text" id="window" value="tomorrow morning">
+
+    <label for="scenario">What happens at the clinic</label>
+    <select id="scenario">
+      <option value="offers_slot">The receptionist offers a slot</option>
+      <option value="no_slot_offers_later">No slot in that window, a later one offered</option>
+      <option value="no_answer">Nobody answers</option>
+      <option value="busy">The line is busy</option>
+    </select>
+
+    <div class="row">
+      <button id="call">Place the call</button>
+    </div>
+
+    <div class="out" id="clinicOut"></div>
+  </section>
+
+</div>
+
+<footer>
+  Built on Sarvam AI — Saaras v4 (verbatim), <code>sarvam-105b</code>, Mayura v1, Bulbul v4 Flash,
+  <code>sarvam-105b-conversations</code>. The agent never names a condition, never suggests a dose
+  and never substitutes a medicine; each of those goes to a human.
+  <a href="/docs">API docs</a> · <a href="/audit">audit trail</a>
+</footer>
+</div>
+
+<script>
+const HH = "hh_warangal_01";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let episodeId = null;
+let recorder = null, chunks = [];
+
+function field(k, v, cls="") {
+  if (v === null || v === undefined || v === "") return "";
+  return `<div class="field"><div class="k">${esc(k)}</div><div class="v ${cls}">${v}</div></div>`;
+}
+function audioEl(ref, dataUri) {
+  // Prefer the inlined bytes: on a serverless host the file in /tmp may not be
+  // there for a second request.
+  const src = dataUri || ("/audio/" + String(ref ?? "").replace(/^out\//, ""));
+  if (!dataUri && !ref) return "";
+  return `<audio controls preload="none" src="${esc(src)}"></audio>`;
+}
+function busy(btn, on, label) {
+  btn.disabled = on;
+  if (on) { btn.dataset.label = btn.textContent; btn.innerHTML = `<span class="spin"></span>${label}`; }
+  else if (btn.dataset.label) { btn.textContent = btn.dataset.label; }
+}
+
+// --- the household, from the backend's own fixture --------------------------
+const PEOPLE = [
+  ["p_amma",   "Lakshmi — the parent (Telugu)"],
+  ["p_son",    "Ravi — responsible person (English)"],
+  ["p_sister", "Divya — family group (Hindi)"],
+];
+PEOPLE.forEach(([id, label]) => {
+  const o = document.createElement("option");
+  o.value = id; o.textContent = label; $("person").appendChild(o);
+});
+
+fetch("/healthz").then(r => r.json()).then(h => {
+  const live = h.sarvam === "live";
+  $("status").innerHTML =
+    `<span class="dot ${live ? "live" : ""}"></span>` +
+    (live ? "Sarvam live — real speech, translation and reasoning"
+          : "No API key set — serving recorded fixtures, every response tagged source: mock") +
+    ` · household <code>${esc(h.households?.[0] ?? "—")}</code>`;
+}).catch(() => { $("status").innerHTML = `<span class="dot"></span>backend unreachable`; });
+
+// --- 1. talk ---------------------------------------------------------------
+async function talk(audioBlob) {
+  const btn = $("send");
+  const body = new FormData();
+  body.append("household_id", HH);
+  body.append("person_id", $("person").value);
+  body.append("speak", "true");
+  if (episodeId) body.append("episode_id", episodeId);
+  if (audioBlob) body.append("file", audioBlob, "note.webm");
+  else {
+    const t = $("text").value.trim();
+    if (!t) { $("text").focus(); return; }
+    body.append("text", t);
+  }
+
+  busy(btn, true, "the agent is listening…");
+  $("talkOut").classList.remove("show");
+  try {
+    const r = await fetch("/agent/talk", { method: "POST", body });
+    const d = await r.json();
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail));
+    episodeId = d.episode_id;
+    renderTalk(d);
+  } catch (e) {
+    $("talkOut").innerHTML = `<div class="note err">${esc(e.message)}</div>`;
+    $("talkOut").classList.add("show");
+  } finally { busy(btn, false); }
+}
+
+function renderTalk(d) {
+  const a = d.assessment, h = d.heard, rep = d.reply;
+  const factors = (a.factors_used || []).map(f => `<span class="tag">${esc(f)}</span>`).join("");
+  let html = "";
+  html += field("Heard, word for word", esc(h.verbatim), "native");
+  html += field("Language", `${esc(h.language)}${h.language_confidence != null ? ` · confidence ${h.language_confidence}` : ""}${h.route === "rest" || h.route === "batch" ? ` · saaras:v4 (${esc(h.route)})` : ""}`);
+  if (h.needs_human_confirmation) html += field("", `<span class="pill urgent">a person should check this transcript</span>`);
+  html += field("Tier", `<span class="pill ${esc(a.tier)}">${esc(a.tier)}</span>` + (a.escalated ? ` <span class="tag">a human was asked</span>` : ""));
+  if (factors) html += field("Factors used", `<div class="tags">${factors}</div>`);
+  html += field("Reason", esc(a.reason));
+  html += field("Summary for the record", esc(a.summary));
+  html += field("Why that tier", esc(a.ratchet));
+  html += field("Account", `${esc(a.account_type)} · trigger ${esc(a.trigger_kind)}`);
+  html += field("The agent says", esc(rep.text_en));
+  if (rep.text_in_their_language) html += field(`In their language (${esc(rep.spoken_language)})`, esc(rep.text_in_their_language), "native");
+  if (rep.audio_ref || rep.audio_data_uri) html += field("Spoken, at pace 0.8", audioEl(rep.audio_ref, rep.audio_data_uri));
+  if (rep.fallback_reason) html += `<div class="note">${esc(rep.fallback_reason)}</div>`;
+  if (rep.refused_and_replaced) html += `<div class="note">The agent's own reply broke one of the three refusals, so it was discarded and the episode was handed to a person. What you see above is the hand-off sentence, built from a template.</div>`;
+  (d.escalations || []).forEach(e => { html += `<div class="note">${esc(e)}</div>`; });
+  html += `<div class="field"><div class="k">Episode</div><div class="v"><code>${esc(d.episode_id)}</code> — the clinic call will attach to it</div></div>`;
+  $("talkOut").innerHTML = html;
+  $("talkOut").classList.add("show");
+}
+
+$("send").onclick = () => talk(null);
+$("clear").onclick = () => {
+  $("text").value = ""; episodeId = null;
+  $("talkOut").classList.remove("show"); $("clinicOut").classList.remove("show");
+};
+
+$("rec").onclick = async () => {
+  const btn = $("rec");
+  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    chunks = [];
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      btn.textContent = "● Record instead";
+      btn.classList.add("rec");
+      talk(new Blob(chunks, { type: "audio/webm" }));
+    };
+    recorder.start();
+    btn.textContent = "■ Stop and send";
+    btn.classList.remove("rec");
+  } catch {
+    $("talkOut").innerHTML = `<div class="note err">No microphone access. Type instead.</div>`;
+    $("talkOut").classList.add("show");
+  }
+};
+
+// --- 2. clinic call --------------------------------------------------------
+$("call").onclick = async () => {
+  const btn = $("call");
+  busy(btn, true, "dialling the clinic…");
+  $("clinicOut").classList.remove("show");
+  try {
+    const r = await fetch("/clinic/call", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        household_id: HH,
+        episode_id: episodeId,
+        reason: $("reason").value,
+        requested_window: $("window").value,
+        scenario: $("scenario").value,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail));
+    renderClinic(d);
+  } catch (e) {
+    $("clinicOut").innerHTML = `<div class="note err">${esc(e.message)}</div>`;
+    $("clinicOut").classList.add("show");
+  } finally { busy(btn, false); }
+};
+
+function renderClinic(d) {
+  const b = d.booking || {};
+  let html = "";
+  if (d.clinic_reached) {
+    html += field("Clinic reached", `${esc(d.clinic_reached.name)} <span class="tag">rank ${esc(d.clinic_reached.rank)}</span> <code>${esc(d.clinic_reached.phone_e164)}</code>`);
+  }
+  if (d.fell_through) html += `<div class="note">${esc(d.fallback_reason || "The first clinic did not work out, so the agent moved down the ranked list.")}</div>`;
+  if (b.status) {
+    const ok = b.status === "confirmed";
+    html += field("Booking", `<span class="pill ${ok ? "elevated" : "urgent"}">${esc(b.status)}</span>` +
+      (b.slot ? ` ${esc(b.slot)}` : "") +
+      (b.confirmed_by_name ? ` · confirmed by <strong>${esc(b.confirmed_by_name)}</strong>` : " · nobody has confirmed it by name yet"));
+    if (b.note) html += field("Note", esc(b.note));
+  }
+  html += field("Transport", `<code>${esc(d.transport)}</code> — ` + (d.transport === "telephony"
+    ? "a real outbound call"
+    : "no phone line: the agent's own lines are generated live, the receptionist is scripted"));
+  if (d.escalated) html += `<div class="note">${esc(d.escalation_reason || "Escalated to a human.")}</div>`;
+
+  const turns = (d.transcript || []).map(t =>
+    `<div class="turn ${t.speaker === "agent" ? "agent" : ""}"><div class="who">${esc(t.speaker.replace(/_/g, " "))}</div><div>${esc(t.text)}</div></div>`
+  ).join("");
+  if (turns) html += `<div class="turns">${turns}</div>`;
+
+  $("clinicOut").innerHTML = html;
+  $("clinicOut").classList.add("show");
+}
+</script>
+</body>
+</html>

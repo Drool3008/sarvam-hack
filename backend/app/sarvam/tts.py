@@ -20,6 +20,7 @@ pre-translate for whichever language Bulbul ends up actually using.
 from __future__ import annotations
 
 import base64
+import os
 import json
 import uuid
 from dataclasses import dataclass
@@ -29,7 +30,11 @@ from .client import client, live, with_retries
 from .translate import translate_text
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
-OUT_DIR = Path(__file__).resolve().parents[3] / "out"
+# Where rendered WAVs land. Overridable because serverless hosts (Vercel,
+# Cloud Run) give a read-only filesystem apart from /tmp. The returned
+# `audio_ref` keeps its stable "out/<name>" shape whatever the directory is;
+# the app serves that prefix from this directory.
+OUT_DIR = Path(os.environ.get("AUDIO_DIR") or Path(__file__).resolve().parents[3] / "out")
 
 # README language-coverage table + "Component deep-dives / Bulbul": v4 Flash
 # speaks 10 languages. Not ml-IN or od-IN (v3-only, v3 end-of-life on Voice
