@@ -5,6 +5,10 @@ This build implements **two** of its functionalities end to end on Sarvam AI,
 and deliberately leaves the rest out rather than stubbing it.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Drool3008/sarvam-hack)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Drool3008/sarvam-hack&env=SARVAM_API_KEY)
+
+The deployed root URL is the interface itself. See `docs/DEPLOY.md` for the
+import settings and for which host suits which purpose.
 
 ## 1. The person talks to the agent — `POST /agent/talk`
 

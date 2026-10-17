@@ -1,3 +1,9 @@
-# Vercel installs from the project root. The backend's pins are the single
-# source of truth; this file only points at them.
--r backend/requirements.txt
+# Kept identical to backend/requirements.txt. Vercel reads dependency names
+# from this file to detect the framework, so it cannot be an "-r" indirection.
+fastapi==0.143.3
+httpx==0.28.1
+pydantic-settings==2.16.0
+pytest==9.1.1
+python-multipart==0.0.32
+sarvamai==0.1.37
+uvicorn==0.54.0

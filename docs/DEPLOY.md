@@ -66,11 +66,53 @@ gcloud run deploy family-health-agent --source . --region asia-south1 \
   --set-secrets SARVAM_API_KEY=sarvam-api-key:latest --allow-unauthenticated
 ```
 
+## Vercel
+
+Configured and supported, with real caveats — read them before relying on it.
+
+**Import settings**
+
+| Setting | Value |
+|---|---|
+| Root Directory | `./` (the repository root — not `backend/`, not `web/`) |
+| Framework Preset | FastAPI, detected automatically from `requirements.txt` |
+| Build Command | leave empty |
+| Entrypoint | `server.py`, detected automatically |
+| Environment variable | `SARVAM_API_KEY` — add it in the project settings |
+
+`vercel.json` sets `AUDIO_DIR=/tmp/out` and `AUDIO_INLINE=1` already, so there is
+nothing else to configure.
+
+**Why the root, not a subfolder.** Vercel's Python runtime looks for a top-level
+`app` in a fixed set of filenames at the project root. `server.py` provides it and
+puts `backend/` on the import path. It is deliberately not called `app.py`,
+because the backend package is itself named `app` and a root `app.py` would
+shadow it.
+
+`requirements.txt` at the root is a deliberate duplicate of
+`backend/requirements.txt`, not an `-r` include: Vercel reads dependency names out
+of that file to detect the framework, and an include hides them. Keep the two in
+step.
+
+**The caveats**
+
+- **Timeout.** `maxDuration` is set to 60 s, the Hobby ceiling. A single
+  `/agent/talk` turn makes four or five Sarvam calls, one of them an assessment
+  with `reasoning_effort="high"`, so a slow turn can approach that. Render and
+  Cloud Run have no such ceiling.
+- **No writable disk.** Bulbul output goes to `/tmp`, which is per-instance and
+  not durable. That is why `AUDIO_INLINE=1` returns the WAV with the reply
+  instead of relying on a second request for the file.
+- **No batch speech-to-text.** A voice note over 30 s routes to a Saaras batch
+  job that polls to completion; that will exceed 60 s. Keep notes short on Vercel.
+
+For anything beyond a demo, Render or Cloud Run is the better host. Vercel is
+right when the audience is clicking a link.
+
 ## Not suitable
 
-- **Vercel / Netlify Functions**: the serverless timeout (10-60 s) cuts off Saaras
-  batch jobs and the clinic-call dialogue, and the filesystem is read-only apart
-  from `/tmp`.
+- **Netlify Functions**: the same timeout and read-only filesystem problems as
+  Vercel, without a configured entrypoint here.
 - **GitHub Pages and other static hosts**: see above.
 
 ## Before any public deploy

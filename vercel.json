@@ -1,15 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/index.py": {
-      "runtime": "@vercel/python@4.3.0",
+    "server.py": {
       "maxDuration": 60,
-      "memory": 1024
+      "memory": 1024,
+      "excludeFiles": "{.venv/**,out/**,backend/tests/**,**/__pycache__/**,*.md,docs/**}"
     }
   },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.py" }
-  ],
   "env": {
     "AUDIO_DIR": "/tmp/out",
     "AUDIO_INLINE": "1"
