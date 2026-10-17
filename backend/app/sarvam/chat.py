@@ -59,18 +59,36 @@ class SummaryResult:
 
 
 def complete(
-    messages: list[dict[str, str]], *, max_tokens: int = MAX_TOKENS, model: str = MODEL
+    messages: list[dict[str, str]],
+    *,
+    max_tokens: int = MAX_TOKENS,
+    model: str = MODEL,
+    response_format: dict | None = None,
+    reasoning_effort: str | None = None,
+    mock_text: str | None = None,
 ) -> ChatResult:
     """`chat.completions` with a caller-supplied `messages` list.
 
     `max_tokens` must stay well above the reasoning budget — reasoning is on
     by default for sarvam-105b and reasoning tokens count against it.
+
+    `response_format` carries the strict `json_schema` the assess stage needs, so
+    the assessment comes back in a fixed shape or not at all. `mock_text` lets a
+    caller supply the shape its own mock path expects, since one canned string
+    cannot stand in for both prose and JSON.
     """
     if not live():
-        return ChatResult(text=_MOCK_COMPLETION, source="mock")
+        return ChatResult(text=mock_text or _MOCK_COMPLETION, source="mock")
 
     def _call():
-        return client().chat.completions(model=model, messages=messages, max_tokens=max_tokens)
+        # Omitted rather than passed as None: the SDK treats an explicit None as
+        # a literal null in the request body.
+        kwargs: dict = {"model": model, "messages": messages, "max_tokens": max_tokens}
+        if response_format is not None:
+            kwargs["response_format"] = response_format
+        if reasoning_effort is not None:
+            kwargs["reasoning_effort"] = reasoning_effort
+        return client().chat.completions(**kwargs)
 
     resp = with_retries(_call)
     text = (resp.choices[0].message.content or "").strip()
