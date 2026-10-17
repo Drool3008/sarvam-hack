@@ -1,0 +1,30 @@
+{
+  "offers_slot": {
+    "connects": true,
+    "receptionist_turns": [
+      "Sunrise Polyclinic, good morning, how can I help?",
+      "Yes, Dr Rao has an opening tomorrow at 10 AM. Would that suit?",
+      "Noted — tomorrow 10 AM for Lakshmi. I'll hold the line, please bring her on so she can confirm."
+    ],
+    "offered_slot": "tomorrow 10:00 AM",
+    "in_requested_window": true
+  },
+  "no_slot_offers_later": {
+    "connects": true,
+    "receptionist_turns": [
+      "Sunrise Polyclinic, good afternoon.",
+      "I'm sorry, nothing free this week in the morning — the earliest I have is Thursday at 6 PM in the evening. Would that work instead?",
+      "Alright, Thursday 6 PM it is. I'll hold while you bring the parent on to confirm."
+    ],
+    "offered_slot": "Thursday 18:00",
+    "in_requested_window": false
+  },
+  "no_answer": {
+    "connects": false,
+    "outcome": "no_answer"
+  },
+  "busy": {
+    "connects": false,
+    "outcome": "busy"
+  }
+}
